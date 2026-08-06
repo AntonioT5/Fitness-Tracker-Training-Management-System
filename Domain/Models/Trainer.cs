@@ -4,7 +4,7 @@ namespace Domain.Models;
 
 public class Trainer : BaseEntity
 {
-    public string? UserId { get; set; }
+    public required string UserId { get; set; }
     public virtual GymAppUser User { get; set; } = null!;
 
     public int YearsExperience { get; set; }

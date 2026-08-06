@@ -8,7 +8,7 @@ public class WorkoutPlan : BaseEntity
     public string Description { get; set; } = string.Empty;
     public int DurationWeeks  { get; set; }
     
-    public Guid? TrainerId { get; set; }
+    public Guid TrainerId { get; set; }
     public virtual Trainer Trainer { get; set; } = null!;
     
     public virtual ICollection<MemberWorkoutPlan> MemberWorkoutPlans { get; set; } = new List<MemberWorkoutPlan>();

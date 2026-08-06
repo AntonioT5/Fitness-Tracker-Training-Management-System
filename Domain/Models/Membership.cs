@@ -11,9 +11,9 @@ public class Membership : BaseAuditableEntity<GymAppUser>
     public bool IsActive { get; set; }
     public MembershipType Type { get; set; }
     
-    public Guid? GymId { get; set; }
+    public Guid GymId { get; set; }
     public virtual Gym Gym { get; set; } = null!;
     
-    public Guid? MemberId { get; set; }
+    public Guid MemberId { get; set; }
     public virtual Member Member { get; set; } = null!;
 }
