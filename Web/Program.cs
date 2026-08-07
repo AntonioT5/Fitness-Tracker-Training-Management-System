@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using Repository.Implementation;
+using Repository.Interface;
+using Service.Implementation;
+using Service.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +22,20 @@ builder.Services.AddDefaultIdentity<GymAppUser>(options => options.SignIn.Requir
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
+
+// Repository
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Service
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<IExerciseWorkoutPlanService, ExerciseWorkoutPlanService>();
+builder.Services.AddScoped<IGymService, GymService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
+builder.Services.AddScoped<IMemberWorkoutPlanService, MemberWorkoutPlanService>();
+builder.Services.AddScoped<ITrainerService, TrainerService>();
+builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
+builder.Services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
 
 var app = builder.Build();
 
