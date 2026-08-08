@@ -5,45 +5,44 @@ using Web.Response;
 
 namespace Web.Mapper;
 
-public class ExerciseMapper
+public class GymMapper
 {
-    private readonly IExerciseService _service;
-    
-    public ExerciseMapper(IExerciseService service)
+    private readonly IGymService _service;
+
+    public GymMapper(IGymService service)
     {
         _service = service;
     }
 
-    public async Task<ExerciseResponse?> GetById(Guid id)
-    {
-        var result = await _service.GetByIdNotNullAsync(id);
-        return result.ToResponse();
-    }
-    
-    public async Task<List<ExerciseResponse?>> GetAll()
+    public async Task<List<GymResponse?>> GetGetAll()
     {
         var result = await _service.GetAllAsync();
         return result.ToResponse();
     }
 
-    public async Task<ExerciseResponse?> InsertAsync(ExerciseRequest request)
+    public async Task<GymResponse?> GetById(Guid id)
+    {
+        var result = await _service.GetByIdNotNullAsync(id);
+        return result.ToResponse();
+    }
+
+    public async Task<GymResponse?> InsertAsync(GymRequest request)
     {
         var dto = request.ToDto();
         var result = await _service.InsertAsync(dto);
         return result.ToResponse();
     }
-
-    public async Task<ExerciseResponse?> UpdateAsync(Guid id, ExerciseRequest request)
+    
+    public async Task<GymResponse?> UpdateAsync(Guid id, GymRequest request)
     {
         var dto = request.ToDto();
         var result = await _service.UpdateAsync(id, dto);
         return result.ToResponse();
     }
     
-    public async Task<ExerciseResponse?> DeleteAsync(Guid id)
+    public async Task<GymResponse?> DeleteAsync(Guid id)
     {
         var result = await _service.DeleteAsync(id);
         return result.ToResponse();
     }
-    
 }
