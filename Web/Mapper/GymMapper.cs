@@ -14,7 +14,7 @@ public class GymMapper
         _service = service;
     }
 
-    public async Task<List<GymResponse?>> GetGetAll()
+    public async Task<List<GymResponse?>> GetAll()
     {
         var result = await _service.GetAllAsync();
         return result.ToResponse();

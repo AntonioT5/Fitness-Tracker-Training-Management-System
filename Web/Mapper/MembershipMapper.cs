@@ -14,7 +14,7 @@ public class MembershipMapper
         _service = service;
     }
 
-    public async Task<List<MembershipResponse?>> GetGetAll()
+    public async Task<List<MembershipResponse?>> GetAll()
     {
         var result = await _service.GetAllAsync();
         return result.ToResponse();

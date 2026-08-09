@@ -14,7 +14,7 @@ public class ExerciseWorkoutPlanMapper
         _service = service;
     }
 
-    public async Task<List<ExerciseWorkoutPlanResponse?>> GetGetAll()
+    public async Task<List<ExerciseWorkoutPlanResponse?>> GetAll()
     {
         var result = await _service.GetAllAsync();
         return result.ToResponse();

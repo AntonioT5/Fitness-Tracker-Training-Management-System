@@ -6,6 +6,7 @@ using Repository.Implementation;
 using Repository.Interface;
 using Service.Implementation;
 using Service.Interface;
+using Web.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,17 @@ builder.Services.AddScoped<IMemberWorkoutPlanService, MemberWorkoutPlanService>(
 builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
 builder.Services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
+
+// Mapper
+builder.Services.AddScoped<ExerciseMapper>();
+builder.Services.AddScoped<GymMapper>();
+builder.Services.AddScoped<MemberMapper>();
+builder.Services.AddScoped<TrainerMapper>();
+builder.Services.AddScoped<MembershipMapper>();
+builder.Services.AddScoped<WorkoutPlanMapper>();
+builder.Services.AddScoped<WorkoutSessionMapper>();
+builder.Services.AddScoped<MemberWorkoutPlanMapper>();
+builder.Services.AddScoped<ExerciseWorkoutPlanMapper>();
 
 var app = builder.Build();
 

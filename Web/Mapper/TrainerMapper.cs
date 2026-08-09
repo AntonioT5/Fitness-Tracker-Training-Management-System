@@ -14,7 +14,7 @@ public class TrainerMapper
         _service = service;
     }
 
-    public async Task<List<TrainerResponse?>> GetGetAll()
+    public async Task<List<TrainerResponse?>> GetAll()
     {
         var result = await _service.GetAllAsync();
         return result.ToResponse();
