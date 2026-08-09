@@ -6,6 +6,7 @@ using Repository.Implementation;
 using Repository.Interface;
 using Service.Implementation;
 using Service.Interface;
+using Web.Interceptor;
 using Web.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 //Connecting to the Postgres DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
+    {
+        options.UseNpgsql(connectionString);
+        options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
+    }
+);
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -37,6 +43,10 @@ builder.Services.AddScoped<IMemberWorkoutPlanService, MemberWorkoutPlanService>(
 builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
 builder.Services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
+
+
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddHttpContextAccessor();
 
 // Mapper
 builder.Services.AddScoped<ExerciseMapper>();
