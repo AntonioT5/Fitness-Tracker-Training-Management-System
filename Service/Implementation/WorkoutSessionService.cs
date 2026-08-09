@@ -1,5 +1,6 @@
 ﻿using Domain.Dto;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Service.Interface;
 
@@ -16,20 +17,25 @@ public class WorkoutSessionService : IWorkoutSessionService
     
     public async Task<List<WorkoutSession>> GetAllAsync()
     {
-        var result = await _repository.GetAllAsync(x => x);
+        var result = await _repository.GetAllAsync(x => x,
+            include: x=>x.Include(e=>e.Member).ThenInclude(e=>e.User)
+                .Include(e=>e.Trainer).ThenInclude(e=>e.User)
+                .Include(e=>e.Exercise));
         return result.ToList();
     }
 
     public async Task<WorkoutSession?> GetByIdAsync(Guid id)
     {
         return await _repository.Get(selector: x => x,
-            predicate: x => x.Id == id);
+            predicate: x => x.Id == id,
+            include: x=>x.Include(e=>e.Member).ThenInclude(e=>e.User)
+                .Include(e=>e.Trainer).ThenInclude(e=>e.User)
+                .Include(e=>e.Exercise));
     }
 
     public async Task<WorkoutSession> GetByIdNotNullAsync(Guid id)
     {
-        var result = await _repository.Get(selector: x => x,
-            predicate: x => x.Id == id);
+        var result = await GetByIdAsync(id);
 
         if (result == null)
         {

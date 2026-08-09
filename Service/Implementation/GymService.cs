@@ -28,8 +28,7 @@ public class GymService : IGymService
 
     public async Task<Gym> GetByIdNotNullAsync(Guid id)
     {
-        var result = await _repository.Get(selector: x => x,
-            predicate: x => x.Id == id);
+        var result = await GetByIdAsync(id);
 
         if (result == null)
         {

@@ -1,5 +1,6 @@
 ﻿using Domain.Dto;
 using Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Service.Interface;
 
@@ -16,20 +17,23 @@ public class MembershipService : IMembershipService
     
     public async Task<List<Membership>> GetAllAsync()
     {
-        var result = await _repository.GetAllAsync(x => x);
+        var result = await _repository.GetAllAsync(x => x,
+            include: x=>x.Include(e=>e.Gym)
+                .Include(e=>e.Member).ThenInclude(e=>e.User));
         return result.ToList();
     }
 
     public async Task<Membership?> GetByIdAsync(Guid id)
     {
         return await _repository.Get(selector: x => x,
-            predicate: x => x.Id == id);
+            predicate: x => x.Id == id,
+            include: x=>x.Include(e=>e.Gym)
+                .Include(e=>e.Member).ThenInclude(e=>e.User));
     }
 
     public async Task<Membership> GetByIdNotNullAsync(Guid id)
     {
-        var result = await _repository.Get(selector: x => x,
-            predicate: x => x.Id == id);
+        var result = await GetByIdAsync(id);
 
         if (result == null)
         {

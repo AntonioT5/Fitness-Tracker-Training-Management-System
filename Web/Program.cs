@@ -58,6 +58,8 @@ builder.Services.AddScoped<WorkoutPlanMapper>();
 builder.Services.AddScoped<WorkoutSessionMapper>();
 builder.Services.AddScoped<MemberWorkoutPlanMapper>();
 builder.Services.AddScoped<ExerciseWorkoutPlanMapper>();
+// Interceptor
+builder.Services.AddScoped<AuditInterceptor>();
 
 var app = builder.Build();
 

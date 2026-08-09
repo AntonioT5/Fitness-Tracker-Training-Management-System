@@ -29,9 +29,7 @@ public class ExerciseService : IExerciseService
 
     public async Task<Exercise> GetByIdNotNullAsync(Guid id)
     {
-        var result = await _repository.Get(
-            selector:x=>x,
-            predicate:x=>x.Id == id);
+        var result = await GetByIdAsync(id);
 
         if(result == null)
         {
