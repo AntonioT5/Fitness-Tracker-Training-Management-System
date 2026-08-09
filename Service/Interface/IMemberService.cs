@@ -11,4 +11,7 @@ public interface IMemberService
     Task<Member> InsertAsync(MemberDto memberDto);
     Task<Member> UpdateAsync(Guid id, MemberDto memberDto);
     Task<Member> DeleteAsync(Guid id);
+    
+    public Task<PaginatedResult<Member>> GetAllPagedAsync(int pageNumber, int pageSize);
+    
 }

@@ -25,7 +25,13 @@ public class ExerciseMapper
         var result = await _service.GetAllAsync();
         return result.ToResponse();
     }
-
+    
+    public async Task<PaginatedResponse<ExerciseResponse?>> PaginatedGetAllAsync(PaginateRequest request)
+    {
+        var result = await _service.GetAllPagedAsync(request.PageNumber, request.PageSize);
+        return result.ToPaginatedResponse(e => e.ToResponse());
+    }
+    
     public async Task<ExerciseResponse?> InsertAsync(ExerciseRequest request)
     {
         var dto = request.ToDto();

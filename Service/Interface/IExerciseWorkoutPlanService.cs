@@ -11,4 +11,6 @@ public interface IExerciseWorkoutPlanService
     Task<ExerciseWorkoutPlan> InsertAsync(ExerciseWorkoutPlanDto exerciseWorkoutPlanDto);
     Task<ExerciseWorkoutPlan> UpdateAsync(Guid id, ExerciseWorkoutPlanDto exerciseWorkoutPlanDto);
     Task<ExerciseWorkoutPlan> DeleteAsync(Guid id);
+    
+    public Task<PaginatedResult<ExerciseWorkoutPlan>> GetAllPagedAsync(int pageNumber, int pageSize);
 }

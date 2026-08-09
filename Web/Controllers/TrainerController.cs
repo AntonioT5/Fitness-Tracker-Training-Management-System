@@ -31,6 +31,12 @@ public class TrainerController : ControllerBase
             return NotFound();
         return Ok(result);
     }
+    
+    [HttpGet("paged")]
+    public async Task<PaginatedResponse<TrainerResponse?>> Page([FromQuery] PaginateRequest pageRequest)
+    {
+        return await _mapper.PaginatedGetAllAsync(pageRequest);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] TrainerRequest request)

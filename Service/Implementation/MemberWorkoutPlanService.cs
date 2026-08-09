@@ -69,4 +69,16 @@ public class MemberWorkoutPlanService : IMemberWorkoutPlanService
         var result = await GetByIdNotNullAsync(id);
         return await _repository.DeleteAsync(result);
     }
+    
+    public async Task<PaginatedResult<MemberWorkoutPlan>> GetAllPagedAsync(int pageNumber, int pageSize)
+    {
+        return await _repository.GetAllPagedAsync(
+            selector: x => x,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            include: x=>x.Include(e=>e.Member).ThenInclude(e=>e.User)
+                .Include(e=>e.WorkoutPlan),
+            orderBy: x=>x.OrderBy(e=>e.AssignedDate),
+            asNoTracking: true);
+    }
 }

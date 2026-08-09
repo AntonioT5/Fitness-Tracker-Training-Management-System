@@ -31,6 +31,12 @@ public class WorkoutPlanController : ControllerBase
             return NotFound();
         return Ok(result);
     }
+    
+    [HttpGet("paged")]
+    public async Task<PaginatedResponse<WorkoutPlanResponse?>> Page([FromQuery] PaginateRequest pageRequest)
+    {
+        return await _mapper.PaginatedGetAllAsync(pageRequest);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] WorkoutPlanRequest request)

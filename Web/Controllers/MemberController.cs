@@ -31,6 +31,12 @@ public class MemberController : ControllerBase
             return NotFound();
         return Ok(result);
     }
+    
+    [HttpGet("paged")]
+    public async Task<PaginatedResponse<MemberResponse?>> Page([FromQuery] PaginateRequest pageRequest)
+    {
+        return await _mapper.PaginatedGetAllAsync(pageRequest);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] MemberRequest request)

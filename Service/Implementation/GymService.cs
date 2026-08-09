@@ -64,4 +64,14 @@ public class GymService : IGymService
         var result = await GetByIdNotNullAsync(id);
         return await _repository.DeleteAsync(result);
     }
+    
+    public async Task<PaginatedResult<Gym>> GetAllPagedAsync(int pageNumber, int pageSize)
+    {
+        return await _repository.GetAllPagedAsync(
+            selector: x => x,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            orderBy: x=>x.OrderBy(e=>e.Name),
+            asNoTracking: true);
+    }
 }

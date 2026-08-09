@@ -70,4 +70,16 @@ public class ExerciseWorkoutPlanService : IExerciseWorkoutPlanService
         var exerciseWorkoutPlan = await GetByIdNotNullAsync(id);
         return await _repository.DeleteAsync(exerciseWorkoutPlan);
     }
+    
+    public async Task<PaginatedResult<ExerciseWorkoutPlan>> GetAllPagedAsync(int pageNumber, int pageSize)
+    {
+        return await _repository.GetAllPagedAsync(
+            selector: x => x,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            include:x=>x.Include(e => e.Exercise)
+                .Include(e=>e.WorkoutPlan),
+            orderBy: x=>x.OrderBy(e=>e.Exercise.Name), 
+            asNoTracking: true);
+    }
 }

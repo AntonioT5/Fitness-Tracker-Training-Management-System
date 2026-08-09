@@ -63,4 +63,15 @@ public class TrainerService : ITrainerService
         var result = await GetByIdNotNullAsync(id);
         return await _repository.DeleteAsync(result);
     }
+    
+    public async Task<PaginatedResult<Trainer>> GetAllPagedAsync(int pageNumber, int pageSize)
+    {
+        return await _repository.GetAllPagedAsync(
+            selector: x => x,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            include: x=>x.Include(e=>e.User),
+            orderBy: x=>x.OrderBy(e=>e.User.FirstName),
+            asNoTracking: true);
+    }
 }

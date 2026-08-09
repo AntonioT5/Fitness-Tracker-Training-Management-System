@@ -26,15 +26,21 @@ public class WorkoutSessionController : ControllerBase
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         var result = await _mapper.GetById(id);
+        if (result == null)
+            return NotFound();
         return Ok(result);
+    }
+    
+    [HttpGet("paged")]
+    public async Task<PaginatedResponse<WorkoutSessionResponse?>> Page([FromQuery] PaginateRequest pageRequest)
+    {
+        return await _mapper.PaginatedGetAllAsync(pageRequest);
     }
 
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] WorkoutSessionRequest request)
     {
         var result = await _mapper.InsertAsync(request);
-        if (result == null)
-            return NotFound();
         return Ok(result);
     }
 

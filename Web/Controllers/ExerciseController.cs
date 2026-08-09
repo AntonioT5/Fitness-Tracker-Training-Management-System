@@ -32,6 +32,12 @@ public class ExerciseController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("paged")]
+    public async Task<PaginatedResponse<ExerciseResponse?>> Page([FromQuery] PaginateRequest pageRequest)
+    {
+        return await _mapper.PaginatedGetAllAsync(pageRequest);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] ExerciseRequest request)
     {

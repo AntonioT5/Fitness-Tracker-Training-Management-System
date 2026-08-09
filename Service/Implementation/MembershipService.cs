@@ -75,4 +75,16 @@ public class MembershipService : IMembershipService
         var result = await GetByIdNotNullAsync(id);
         return await _repository.DeleteAsync(result);
     }
+    
+    public async Task<PaginatedResult<Membership>> GetAllPagedAsync(int pageNumber, int pageSize)
+    {
+        return await _repository.GetAllPagedAsync(
+            selector: x => x,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            include: x=>x.Include(e=>e.Gym)
+                .Include(e=>e.Member).ThenInclude(e=>e.User),
+            orderBy: x=>x.OrderBy(e=>e.StartDate),
+            asNoTracking: true);
+    }
 }

@@ -11,4 +11,6 @@ public interface IWorkoutSessionService
     Task<WorkoutSession> InsertAsync(WorkoutSessionDto workoutSessionDto);
     Task<WorkoutSession> UpdateAsync(Guid id, WorkoutSessionDto workoutSessionDto);
     Task<WorkoutSession> DeleteAsync(Guid id);
+    
+    public Task<PaginatedResult<WorkoutSession>> GetAllPagedAsync(int pageNumber, int pageSize);
 }

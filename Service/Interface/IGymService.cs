@@ -11,4 +11,7 @@ public interface IGymService
     Task<Gym> InsertAsync(GymDto gymDto);
     Task<Gym> UpdateAsync(Guid id, GymDto gymDto);
     Task<Gym> DeleteAsync(Guid id);
+    
+    public Task<PaginatedResult<Gym>> GetAllPagedAsync(int pageNumber, int pageSize);
+    
 }

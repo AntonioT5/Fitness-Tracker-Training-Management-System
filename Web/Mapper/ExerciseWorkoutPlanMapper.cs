@@ -25,6 +25,12 @@ public class ExerciseWorkoutPlanMapper
         var result = await _service.GetByIdNotNullAsync(id);
         return result.ToResponse();
     }
+    
+    public async Task<PaginatedResponse<ExerciseWorkoutPlanResponse?>> PaginatedGetAllAsync(PaginateRequest request)
+    {
+        var result = await _service.GetAllPagedAsync(request.PageNumber, request.PageSize);
+        return result.ToPaginatedResponse(e => e.ToResponse());
+    }
 
     public async Task<ExerciseWorkoutPlanResponse?> InsertAsync(ExerciseWorkoutPlanRequest request)
     {

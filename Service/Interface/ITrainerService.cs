@@ -11,4 +11,7 @@ public interface ITrainerService
     Task<Trainer> InsertAsync(TrainerDto trainerDto);
     Task<Trainer> UpdateAsync(Guid id, TrainerDto trainerDto);
     Task<Trainer> DeleteAsync(Guid id);
+    
+    public Task<PaginatedResult<Trainer>> GetAllPagedAsync(int pageNumber, int pageSize);
+    
 }
