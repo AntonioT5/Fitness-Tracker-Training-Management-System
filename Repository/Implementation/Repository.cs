@@ -20,9 +20,6 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
 
     public async Task<T> InsertAsync(T entity)
     {
-        // if (entity.Id == Guid.Empty)
-        //     entity.Id = Guid.NewGuid();
-        
         _context.Add(entity);
         await _context.SaveChangesAsync();
         return entity;

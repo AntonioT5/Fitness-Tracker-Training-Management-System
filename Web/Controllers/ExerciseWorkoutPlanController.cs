@@ -49,6 +49,8 @@ public class ExerciseWorkoutPlanController : ControllerBase
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ExerciseWorkoutPlanRequest request)
     {
         var result = await _mapper.UpdateAsync(id, request);
+        if (result == null)
+            return NotFound();
         return Ok(result);
     }
 
@@ -56,6 +58,8 @@ public class ExerciseWorkoutPlanController : ControllerBase
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var result = await _mapper.DeleteAsync(id);
+        if (result == null)
+            return NotFound();
         return Ok(result);
     }
 }

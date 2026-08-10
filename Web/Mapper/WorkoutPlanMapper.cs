@@ -22,8 +22,15 @@ public class WorkoutPlanMapper
 
     public async Task<WorkoutPlanResponse?> GetById(Guid id)
     {
-        var result = await _service.GetByIdNotNullAsync(id);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.GetByIdNotNullAsync(id);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
     
     public async Task<PaginatedResponse<WorkoutPlanResponse?>> PaginatedGetAllAsync(PaginateRequest request)
@@ -42,13 +49,27 @@ public class WorkoutPlanMapper
     public async Task<WorkoutPlanResponse?> UpdateAsync(Guid id, WorkoutPlanRequest request)
     {
         var dto = request.ToDto();
-        var result = await _service.UpdateAsync(id, dto);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.UpdateAsync(id, dto);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
     
     public async Task<WorkoutPlanResponse?> DeleteAsync(Guid id)
     {
-        var result = await _service.DeleteAsync(id);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.DeleteAsync(id);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 }

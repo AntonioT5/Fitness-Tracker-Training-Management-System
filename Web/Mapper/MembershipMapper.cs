@@ -22,8 +22,15 @@ public class MembershipMapper
 
     public async Task<MembershipResponse?> GetById(Guid id)
     {
-        var result = await _service.GetByIdNotNullAsync(id);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.GetByIdNotNullAsync(id);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
     
     public async Task<PaginatedResponse<MembershipResponse?>> PaginatedGetAllAsync(PaginateRequest request)
@@ -42,13 +49,27 @@ public class MembershipMapper
     public async Task<MembershipResponse?> UpdateAsync(Guid id, MembershipRequest request)
     {
         var dto = request.ToDto();
-        var result = await _service.UpdateAsync(id, dto);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.UpdateAsync(id, dto);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
     
     public async Task<MembershipResponse?> DeleteAsync(Guid id)
     {
-        var result = await _service.DeleteAsync(id);
-        return result.ToResponse();
+        try
+        {
+            var result = await _service.DeleteAsync(id);
+            return result.ToResponse();
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 }
