@@ -32,7 +32,7 @@ public static class WorkoutSessionExtensions
     {
         return new WorkoutSessionDto
         {
-            Date = workoutSession.Date,
+            Date = DateTime.SpecifyKind(workoutSession.Date, DateTimeKind.Utc),
             SetsCompleted = workoutSession.SetsCompleted,
             RepsCompleted = workoutSession.RepsCompleted,
             WeightUsedKg = workoutSession.WeightUsedKg,

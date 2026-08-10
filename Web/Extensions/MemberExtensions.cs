@@ -28,7 +28,7 @@ public static class MemberExtensions
         return new MemberDto
         {
             UserId = e.UserId,
-            DateOfBirth = e.DateOfBirth,
+            DateOfBirth = DateTime.SpecifyKind(e.DateOfBirth, DateTimeKind.Utc),
             Goal =  e.Goal
         };
     }

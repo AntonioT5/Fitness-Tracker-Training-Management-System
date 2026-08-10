@@ -27,7 +27,7 @@ public static class MemberWorkoutPlanExtensions
     {
         return new MemberWorkoutPlanDto
         {
-            AssignedDate = memberWorkoutPlan.AssignedDate,
+            AssignedDate = DateTime.SpecifyKind(memberWorkoutPlan.AssignedDate, DateTimeKind.Utc),
             Status = memberWorkoutPlan.Status,
             MemberId = memberWorkoutPlan.MemberId,
             WorkoutPlanId = memberWorkoutPlan.WorkoutPlanId

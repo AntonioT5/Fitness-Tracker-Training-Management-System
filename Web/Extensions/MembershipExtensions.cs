@@ -30,8 +30,8 @@ public static class MembershipExtensions
     {
         return new MembershipDto
         {
-            StartDate = membership.StartDate,
-            EndDate = membership.EndDate,
+            StartDate = DateTime.SpecifyKind(membership.StartDate, DateTimeKind.Utc),
+            EndDate = DateTime.SpecifyKind(membership.EndDate, DateTimeKind.Utc),
             Price = membership.Price,
             IsActive = membership.IsActive,
             Type = membership.Type,
