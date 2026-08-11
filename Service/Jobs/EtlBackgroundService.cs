@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Service.Implementation;
+using Service.Interface;
 
 namespace Service.Jobs;
 
@@ -22,7 +23,7 @@ public class EtlBackgroundService : BackgroundService
         {
             using var scope = _serviceScopeFactory.CreateScope();
 
-            var service = scope.ServiceProvider.GetRequiredService<EtlService>();
+            var service = scope.ServiceProvider.GetRequiredService<IEtlService>();
 
             try
             {
