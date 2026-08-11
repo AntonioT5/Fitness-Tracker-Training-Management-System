@@ -1,11 +1,14 @@
-﻿using Domain.Models;
+﻿using Domain.Configurations;
+using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Repository;
 using Repository.Implementation;
 using Repository.Interface;
 using Service.Implementation;
 using Service.Interface;
+using Service.Jobs;
 using Web.Interceptor;
 using Web.Mapper;
 
@@ -44,6 +47,9 @@ builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
 builder.Services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
 
+    //ETL
+builder.Services.AddScoped<IEtlService, EtlService>();
+
 
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddHttpContextAccessor();
@@ -60,6 +66,22 @@ builder.Services.AddScoped<MemberWorkoutPlanMapper>();
 builder.Services.AddScoped<ExerciseWorkoutPlanMapper>();
 // Interceptor
 builder.Services.AddScoped<AuditInterceptor>();
+
+// WgerApi
+builder.Services.Configure<WgerApiSettings>(builder.Configuration.GetSection("WgerApi"));
+
+builder.Services.AddHttpClient<IWgerApiClient, WgerApiClient>((sp, client) =>
+{
+
+    var settings = sp.GetRequiredService<IOptions<WgerApiSettings>>();
+
+    client.BaseAddress = new Uri(settings.Value.BaseAddress);
+    client.Timeout = TimeSpan.FromSeconds(settings.Value.TimeoutSeconds);
+    // client.DefaultRequestHeaders.Add("X-Api-Key", settings.ApiKey);
+});
+
+// Background Service
+builder.Services.AddHostedService<EtlBackgroundService>();
 
 var app = builder.Build();
 
