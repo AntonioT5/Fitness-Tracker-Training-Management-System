@@ -14,9 +14,10 @@ public class InboundProcessingJob : IJob
         _entryProcessor = entryProcessor;
         _logger = logger;
     }
-
+    
     public async Task Execute(IJobExecutionContext context)
     {
+        _logger.LogInformation("InboundProcessingJob fired at {Time}", DateTime.UtcNow);
         try
         {
             await _entryProcessor.ProcessPendingEntriesAsync();

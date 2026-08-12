@@ -72,7 +72,7 @@ public class EtlService : IEtlService
             syncLog.Success = true;
             syncLog.CompletedAt = DateTime.UtcNow;
             syncLog.RecordsProcessed = processedCount;
-            _logger.LogInformation("Legacy DB ETL finished successfully at {date}", syncLog.CompletedAt);
+            _logger.LogInformation("ETL finished successfully at {date}", syncLog.CompletedAt);
         }
         catch (Exception ex)
         {

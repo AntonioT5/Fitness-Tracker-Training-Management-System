@@ -75,11 +75,11 @@ public class TrainerService : ITrainerService
             asNoTracking: true);
     }
 
-    public async Task<Trainer?> GetByNameAsync(string name)
+    public async Task<Trainer?> GetByNameAsync(string fullName)
     {
         return await _repository.Get(
             selector: x => x,
-            predicate: x => x.User.FirstName == name,
+            predicate: x => (x.User.FirstName + " " + x.User.LastName) == fullName,
             include: x=>x.Include(e=>e.User)
         );
     }

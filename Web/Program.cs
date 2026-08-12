@@ -31,10 +31,11 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<GymAppUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// builder.Services.AddDefaultIdentity<GymAppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -90,8 +91,6 @@ builder.Services.AddHttpClient<IWgerApiClient, WgerApiClient>((sp, client) =>
 // Background Service
 builder.Services.AddHostedService<EtlBackgroundService>();
 
-var app = builder.Build();
-
 //User
 builder.Services.AddIdentity<GymAppUser, IdentityRole>(options =>
     {
@@ -107,15 +106,18 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
 
+    
+    
     options.AddPolicy("external-api", context =>
     {
         var apiKey = context.Request.Headers["x-api-key"];
 
         var apiClient = context.Items["ApiClient"] as ApiClient;
-
+        var limit = apiClient?.RateLimitMinutes ?? 60;
+        
         return RateLimitPartition.GetFixedWindowLimiter(apiKey.ToString(), _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 60,
+            PermitLimit = limit,
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0,
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst
@@ -124,22 +126,22 @@ builder.Services.AddRateLimiter(options =>
 });
 
 //Quartz
-builder.Services.AddQuartzHostedService();
 
 builder.Services.AddQuartz(options =>
 {
     var jobKey = new JobKey("inbound-job", "inbound");
     options.AddJob<InboundProcessingJob>(o => o.WithIdentity(jobKey));
-
+    
     options.AddTrigger(o =>
     {
         o.ForJob(jobKey).WithIdentity("inbound-job-trigger")
-            .WithCronSchedule("0/40 * * * * ?")
+            .WithCronSchedule("0/20 * * * * ?")
             .WithDescription("Expires unpaid reservations");
     });
 });
+builder.Services.AddQuartzHostedService();
 
-
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
