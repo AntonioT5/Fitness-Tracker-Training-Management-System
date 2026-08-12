@@ -11,6 +11,7 @@ using Service.Interface;
 using Service.Jobs;
 using Web.Interceptor;
 using Web.Mapper;
+using Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +86,17 @@ builder.Services.AddHostedService<EtlBackgroundService>();
 
 var app = builder.Build();
 
+//User
+builder.Services.AddIdentity<GymAppUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -102,6 +114,9 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<ApiKeyAuthMiddleware>();
+app.UseRateLimiter();
 
 app.MapStaticAssets();
 
