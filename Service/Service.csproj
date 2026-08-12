@@ -20,6 +20,9 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
+      <PackageReference Include="Quartz" Version="3.19.1" />
+      <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.19.1" />
+      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.19.1" />
     </ItemGroup>
 
 </Project>

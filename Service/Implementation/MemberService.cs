@@ -76,4 +76,13 @@ public class MemberService : IMemberService
             orderBy: x=>x.OrderBy(e=>e.User.FirstName),
             asNoTracking: true);
     }
+
+    public async Task<Member?> GetByEmailAsync(string email)
+    {
+        return await _repository.Get(
+            selector: x => x,
+            predicate: x => x.User.Email == email,
+            include: x=>x.Include(e=>e.User)
+        );
+    }
 }

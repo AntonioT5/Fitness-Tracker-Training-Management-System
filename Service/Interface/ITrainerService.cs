@@ -14,4 +14,6 @@ public interface ITrainerService
     
     public Task<PaginatedResult<Trainer>> GetAllPagedAsync(int pageNumber, int pageSize);
     
+    Task<Trainer?> GetByNameAsync(string name);
+    
 }

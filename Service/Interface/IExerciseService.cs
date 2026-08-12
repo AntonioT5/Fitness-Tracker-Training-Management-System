@@ -13,4 +13,6 @@ public interface IExerciseService
     Task<Exercise> DeleteAsync(Guid id);
     
     public Task<PaginatedResult<Exercise>> GetAllPagedAsync(int pageNumber, int pageSize);
+    
+    Task<Exercise?> GetByNameAsync(string exerciseName);
 }

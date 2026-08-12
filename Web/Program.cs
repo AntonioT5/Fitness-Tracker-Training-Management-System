@@ -1,8 +1,10 @@
-﻿using Domain.Configurations;
+﻿using System.Threading.RateLimiting;
+using Domain.Configurations;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Quartz;
 using Repository;
 using Repository.Implementation;
 using Repository.Interface;
@@ -68,6 +70,10 @@ builder.Services.AddScoped<ExerciseWorkoutPlanMapper>();
 // Interceptor
 builder.Services.AddScoped<AuditInterceptor>();
 
+//Inbound
+builder.Services.AddScoped<InboundWorkoutSessionEntryProcessor>();
+builder.Services.AddScoped<IInboundWorkoutSessionEntryService, InboundWorkoutSessionEntryService>();
+
 // WgerApi
 builder.Services.Configure<WgerApiSettings>(builder.Configuration.GetSection("WgerApi"));
 
@@ -95,6 +101,44 @@ builder.Services.AddIdentity<GymAppUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+//RateLimiter
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = 429;
+
+    options.AddPolicy("external-api", context =>
+    {
+        var apiKey = context.Request.Headers["x-api-key"];
+
+        var apiClient = context.Items["ApiClient"] as ApiClient;
+
+        return RateLimitPartition.GetFixedWindowLimiter(apiKey.ToString(), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 60,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+    });
+});
+
+//Quartz
+builder.Services.AddQuartzHostedService();
+
+builder.Services.AddQuartz(options =>
+{
+    var jobKey = new JobKey("inbound-job", "inbound");
+    options.AddJob<InboundProcessingJob>(o => o.WithIdentity(jobKey));
+
+    options.AddTrigger(o =>
+    {
+        o.ForJob(jobKey).WithIdentity("inbound-job-trigger")
+            .WithCronSchedule("0/40 * * * * ?")
+            .WithDescription("Expires unpaid reservations");
+    });
+});
+
 
 
 // Configure the HTTP request pipeline.

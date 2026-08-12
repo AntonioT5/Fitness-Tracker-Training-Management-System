@@ -17,4 +17,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<WorkoutSession> WorkoutSessions { get; set; }
     public DbSet<EtlSyncLog> EtlSyncLogs { get; set; }
     public DbSet<GymAppUser> GymAppUsers { get; set; }
+    public DbSet<ApiClient> ApiClients { get; set; }
+    public DbSet<InboundWorkoutSessionEntry> InboundWorkoutSessionEntries { get; set; }
 }

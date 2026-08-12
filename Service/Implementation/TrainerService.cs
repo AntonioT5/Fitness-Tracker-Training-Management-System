@@ -74,4 +74,13 @@ public class TrainerService : ITrainerService
             orderBy: x=>x.OrderBy(e=>e.User.FirstName),
             asNoTracking: true);
     }
+
+    public async Task<Trainer?> GetByNameAsync(string name)
+    {
+        return await _repository.Get(
+            selector: x => x,
+            predicate: x => x.User.FirstName == name,
+            include: x=>x.Include(e=>e.User)
+        );
+    }
 }

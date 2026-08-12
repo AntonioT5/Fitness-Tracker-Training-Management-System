@@ -13,5 +13,7 @@ public interface IMemberService
     Task<Member> DeleteAsync(Guid id);
     
     public Task<PaginatedResult<Member>> GetAllPagedAsync(int pageNumber, int pageSize);
-    
+
+    Task<Member?> GetByEmailAsync(string email);
+
 }

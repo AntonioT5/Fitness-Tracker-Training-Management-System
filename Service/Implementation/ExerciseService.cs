@@ -79,4 +79,12 @@ public class ExerciseService : IExerciseService
             orderBy: x=>x.OrderBy(e=>e.Name),
             asNoTracking: true);
     }
+
+    public async Task<Exercise?> GetByNameAsync(string exerciseName)
+    {
+        return await _repository.Get(
+            selector: x => x,
+            predicate: x => x.Name==exerciseName
+        );
+    }
 }
