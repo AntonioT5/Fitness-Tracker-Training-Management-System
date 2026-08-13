@@ -94,4 +94,14 @@ public class WorkoutSessionService : IWorkoutSessionService
             orderBy: x=>x.OrderBy(e=>e.Date),
             asNoTracking: true);
     }
+
+    public async Task<List<WorkoutSession>> GetAllByMemberNameAsync(Guid memberId)
+    {
+        var result = await _repository.GetAllAsync(x => x,
+            predicate:x=>x.MemberId == memberId,
+            include: x=>x.Include(e=>e.Member).ThenInclude(e=>e.User)
+                .Include(e=>e.Trainer).ThenInclude(e=>e.User)
+                .Include(e=>e.Exercise));
+        return result.ToList();
+    }
 }

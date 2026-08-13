@@ -13,4 +13,6 @@ public interface IWorkoutSessionService
     Task<WorkoutSession> DeleteAsync(Guid id);
     
     public Task<PaginatedResult<WorkoutSession>> GetAllPagedAsync(int pageNumber, int pageSize);
+    
+    Task<List<WorkoutSession>> GetAllByMemberNameAsync(Guid memberId);
 }
