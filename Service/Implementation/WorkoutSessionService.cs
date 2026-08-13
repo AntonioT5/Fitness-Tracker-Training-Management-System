@@ -104,4 +104,9 @@ public class WorkoutSessionService : IWorkoutSessionService
                 .Include(e=>e.Exercise));
         return result.ToList();
     }
+
+    public async Task<ICollection<WorkoutSession>> AddRangeAsync(List<WorkoutSession> ws)
+    {
+        return await _repository.InsertManyAsync(ws);
+    }
 }

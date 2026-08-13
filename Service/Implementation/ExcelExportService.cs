@@ -22,7 +22,7 @@ public class ExcelExportService : IExcelExportService
         
         var headers = new[]
         {
-            "WorkoutSession ID", "Date", "Exercise", "Trainer",
+            "Date", "Exercise", "Trainer",
             "Sets Completed", "Reps Completed", "Weight Used (kg)",
             "Duration (minutes)", "Notes"
         };

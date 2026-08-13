@@ -15,4 +15,5 @@ public interface IWorkoutSessionService
     public Task<PaginatedResult<WorkoutSession>> GetAllPagedAsync(int pageNumber, int pageSize);
     
     Task<List<WorkoutSession>> GetAllByMemberNameAsync(Guid memberId);
+    public Task<ICollection<WorkoutSession>> AddRangeAsync(List<WorkoutSession> ws);
 }

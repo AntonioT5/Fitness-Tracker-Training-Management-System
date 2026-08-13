@@ -51,7 +51,11 @@ builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
 builder.Services.AddScoped<IWorkoutSessionService, WorkoutSessionService>();
 
-    //ETL
+//  Export Import
+builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
+builder.Services.AddScoped<IExcelImportService, ExcelImportService>();
+
+//  ETL
 builder.Services.AddScoped<IEtlService, EtlService>();
 
 
