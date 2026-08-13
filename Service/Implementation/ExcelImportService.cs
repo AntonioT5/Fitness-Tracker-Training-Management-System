@@ -26,10 +26,26 @@ public class ExcelImportService : IExcelImportService
         var result = new ImportResult<WorkoutSessionImportDto>();
 
         using var workbook = new XLWorkbook(fileStream);
+        
         var ws = workbook.Worksheet(1);
 
         var expectedHeaders = new Dictionary<string, int>();
         var headerRow = ws.Row(1);
+        
+        var lastHeaderCell = headerRow.LastCellUsed();
+
+        if (lastHeaderCell == null)
+        {
+            result.Errors.Add(new ImportError
+            {
+                Row = 1,
+                Column = "Header",
+                Message = "The Excel file is empty. No headers were found."
+            });
+
+            return result;
+        }
+        
         for (int col = 1; col <= headerRow.LastCellUsed().Address.ColumnNumber; col++)
         {
             expectedHeaders[headerRow.Cell(col).GetString().Trim().ToLower()] = col;
@@ -185,7 +201,7 @@ public class ExcelImportService : IExcelImportService
                 MemberId = dto.MemberId,
                 TrainerId = dto.TrainerId,
                 ExerciseId = dto.ExerciseId,
-                Date = dto.Date,
+                Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
                 SetsCompleted = dto.SetsCompleted,
                 RepsCompleted = dto.RepsCompleted,
                 WeightUsedKg = dto.WeightUsedKg,
@@ -193,7 +209,6 @@ public class ExcelImportService : IExcelImportService
                 Notes = dto.Notes
             });
         }
-
         return result;
     }
 }

@@ -10,12 +10,10 @@ namespace Web.Controllers;
 public class ImportController : ControllerBase
 {
     private readonly IExcelImportService _excelImportService;
-    private readonly IWorkoutSessionService _workoutSessionService;
 
-    public ImportController(IExcelImportService excelImportService, IWorkoutSessionService workoutSessionService)
+    public ImportController(IExcelImportService excelImportService)
     {
         _excelImportService = excelImportService;
-        _workoutSessionService = workoutSessionService;
     }
     
     [HttpPost("workoutSession")]
@@ -34,38 +32,13 @@ public class ImportController : ControllerBase
         using var stream = file.OpenReadStream();
         var result = await _excelImportService.ImportEventsAsync(stream);
 
-        if (result.HasErrors)
-        {
-            return Ok(new
-            {
-                success = false,
-                totalRows = result.TotalRows,
-                successCount = result.SuccessfulRecords.Count,
-                errorCount = result.Errors.Count,
-                errors = result.Errors
-            });
-        }
-
-        var workoutSession = result.SuccessfulRecords.Select(dto => new WorkoutSession
-        {
-            Date = dto.Date,
-            SetsCompleted = dto.SetsCompleted,
-            RepsCompleted = dto.RepsCompleted,
-            WeightUsedKg = dto.WeightUsedKg,
-            DurationMinutes =  dto.DurationMinutes,
-            Notes = dto.Notes,
-            MemberId =  dto.MemberId,
-            TrainerId =   dto.TrainerId,
-            ExerciseId =  dto.ExerciseId
-        }).ToList();
-
-        await _workoutSessionService.AddRangeAsync(workoutSession);
-
         return Ok(new
         {
-            success = true,
+            success = !result.HasErrors,
             totalRows = result.TotalRows,
-            createdCount = workoutSession.Count
+            createdCount = result.SuccessfulRecords.Count,
+            errorCount = result.Errors.Count,
+            errors = result.Errors
         });
     }
     
@@ -77,9 +50,8 @@ public class ImportController : ControllerBase
 
         var headers = new[]
         {
-            "Date", "Exercise", "Trainer",
-            "Sets Completed", "Reps Completed", "Weight Used (kg)",
-            "Duration (minutes)", "Notes"
+            "member", "date", "exercise", "trainer", "setscompleted", "repscompleted",
+            "weightusedkg", "durationminutes", "notes"
         };
         for (int i = 0; i < headers.Length; i++)
         {
@@ -88,14 +60,15 @@ public class ImportController : ControllerBase
             cell.Style.Font.Bold = true;
         }
         
-        ws.Cell(2, 1).Value = new DateTime(2026, 7, 15, 18, 0, 0);
-        ws.Cell(2, 2).Value = "Exercise Name";
-        ws.Cell(2, 3).Value = "Trainer Name";
-        ws.Cell(2, 4).Value = 5;
-        ws.Cell(2, 5).Value = 10;
-        ws.Cell(2, 6).Value = 70;
-        ws.Cell(2, 7).Value = 3;
-        ws.Cell(2, 8).Value = "Note Test";
+        ws.Cell(2, 1).Value = "member@example.com";
+        ws.Cell(2, 2).Value = new DateTime(2026, 7, 15, 18, 0, 0);
+        ws.Cell(2, 3).Value = "Exercise Name";
+        ws.Cell(2, 4).Value = "Trainer Name";
+        ws.Cell(2, 5).Value = 5;
+        ws.Cell(2, 6).Value = 10;
+        ws.Cell(2, 7).Value = 70;
+        ws.Cell(2, 8).Value = 3;
+        ws.Cell(2, 9).Value = "Note Test";
 
         ws.Columns().AdjustToContents();
 
