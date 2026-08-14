@@ -11,11 +11,17 @@ public class WorkoutSessionService : IWorkoutSessionService
 {
     private readonly IRepository<WorkoutSession> _repository;
     private readonly IMembershipService _membershipService;
+    private readonly ITrainerService _trainerService;
+    private readonly IMemberService _memberService;
+    private readonly IExerciseService _exerciseService;
     
-    public WorkoutSessionService(IRepository<WorkoutSession> repository, IMembershipService membershipService)
+    public WorkoutSessionService(IRepository<WorkoutSession> repository, IMembershipService membershipService, ITrainerService trainerService, IMemberService memberService, IExerciseService exerciseService)
     {
         _repository = repository;
         _membershipService = membershipService;
+        _trainerService = trainerService;
+        _memberService = memberService;
+        _exerciseService = exerciseService;
     }
     
     public async Task<List<WorkoutSession>> GetAllAsync()
@@ -49,6 +55,19 @@ public class WorkoutSessionService : IWorkoutSessionService
 
     public async Task<WorkoutSession> InsertAsync(WorkoutSessionDto workoutSessionDto)
     {
+        
+        var memebr = await _memberService.GetByIdAsync(workoutSessionDto.MemberId);
+        if (memebr == null)
+            throw new InvalidOperationException($"Member with id {workoutSessionDto.MemberId} not found");
+        
+        var trainer = await _trainerService.GetByIdAsync(workoutSessionDto.TrainerId);
+        if (trainer == null)
+            throw new InvalidOperationException($"Trainer with id {workoutSessionDto.TrainerId} not found");
+        
+        var exercise = await _exerciseService.GetByIdAsync(workoutSessionDto.ExerciseId);
+        if (exercise == null)
+            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.TrainerId} not found");
+        
         var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
         if (activeMembership == null)
             throw new InvalidOperationException($"Member {workoutSessionDto.MemberId} does not have an active membership");
@@ -72,6 +91,18 @@ public class WorkoutSessionService : IWorkoutSessionService
     public async Task<WorkoutSession> UpdateAsync(Guid id, WorkoutSessionDto workoutSessionDto)
     {
         var result = await GetByIdNotNullAsync(id);
+        
+        var memebr = await _memberService.GetByIdAsync(workoutSessionDto.MemberId);
+        if (memebr == null)
+            throw new InvalidOperationException($"Member with id {workoutSessionDto.MemberId} not found");
+        
+        var trainer = await _trainerService.GetByIdAsync(workoutSessionDto.TrainerId);
+        if (trainer == null)
+            throw new InvalidOperationException($"Trainer with id {workoutSessionDto.TrainerId} not found");
+        
+        var exercise = await _exerciseService.GetByIdAsync(workoutSessionDto.ExerciseId);
+        if (exercise == null)
+            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.TrainerId} not found");
         
         var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
         if (activeMembership == null)

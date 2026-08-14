@@ -9,10 +9,14 @@ namespace Service.Implementation;
 public class MemberWorkoutPlanService : IMemberWorkoutPlanService
 {
     private readonly IRepository<MemberWorkoutPlan> _repository;
+    private readonly IWorkoutPlanService _workoutPlanService;
+    private readonly IMemberService _memberService;
     
-    public MemberWorkoutPlanService(IRepository<MemberWorkoutPlan> repository)
+    public MemberWorkoutPlanService(IRepository<MemberWorkoutPlan> repository, IWorkoutPlanService workoutPlanService, IMemberService memberService)
     {
         _repository = repository;
+        _workoutPlanService = workoutPlanService;
+        _memberService = memberService;
     }
     
     public async Task<List<MemberWorkoutPlan>> GetAllAsync()
@@ -44,6 +48,14 @@ public class MemberWorkoutPlanService : IMemberWorkoutPlanService
 
     public async Task<MemberWorkoutPlan> InsertAsync(MemberWorkoutPlanDto memberWorkoutPlanDto)
     {
+        var memberWorkoutPlan = await _workoutPlanService.GetByIdAsync(memberWorkoutPlanDto.WorkoutPlanId);
+        if (memberWorkoutPlan == null)
+            throw new InvalidOperationException($"MemberWorkoutPlan with id {memberWorkoutPlanDto.WorkoutPlanId} not found");
+        
+        var member = await _memberService.GetByIdAsync(memberWorkoutPlanDto.MemberId);
+        if (member == null)
+            throw new InvalidOperationException($"Member with id {memberWorkoutPlanDto.MemberId} not found");
+        
         var result = new MemberWorkoutPlan()
         {
             AssignedDate = memberWorkoutPlanDto.AssignedDate,
@@ -56,6 +68,14 @@ public class MemberWorkoutPlanService : IMemberWorkoutPlanService
 
     public async Task<MemberWorkoutPlan> UpdateAsync(Guid id, MemberWorkoutPlanDto memberWorkoutPlanDto)
     {
+        var memberWorkoutPlan = await _workoutPlanService.GetByIdAsync(memberWorkoutPlanDto.WorkoutPlanId);
+        if (memberWorkoutPlan == null)
+            throw new InvalidOperationException($"MemberWorkoutPlan with id {memberWorkoutPlanDto.WorkoutPlanId} not found");
+        
+        var member = await _memberService.GetByIdAsync(memberWorkoutPlanDto.MemberId);
+        if (member == null)
+            throw new InvalidOperationException($"Member with id {memberWorkoutPlanDto.MemberId} not found");
+        
         var result = await GetByIdNotNullAsync(id);
         result.AssignedDate = memberWorkoutPlanDto.AssignedDate;
         result.Status = memberWorkoutPlanDto.Status;

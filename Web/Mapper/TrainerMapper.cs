@@ -49,15 +49,8 @@ public class TrainerMapper
     public async Task<TrainerResponse?> UpdateAsync(Guid id, TrainerRequest request)
     {
         var dto = request.ToDto();
-        try
-        {
-            var result = await _service.UpdateAsync(id, dto);
-            return result.ToResponse();
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
+        var result = await _service.UpdateAsync(id, dto);
+        return result.ToResponse();
     }
     
     public async Task<TrainerResponse?> DeleteAsync(Guid id)

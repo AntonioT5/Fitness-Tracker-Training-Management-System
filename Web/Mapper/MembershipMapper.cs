@@ -49,15 +49,8 @@ public class MembershipMapper
     public async Task<MembershipResponse?> UpdateAsync(Guid id, MembershipRequest request)
     {
         var dto = request.ToDto();
-        try
-        {
-            var result = await _service.UpdateAsync(id, dto);
-            return result.ToResponse();
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
+        var result = await _service.UpdateAsync(id, dto);
+        return result.ToResponse();
     }
     
     public async Task<MembershipResponse?> DeleteAsync(Guid id)

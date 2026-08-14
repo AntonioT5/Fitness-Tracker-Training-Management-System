@@ -1,5 +1,6 @@
 ﻿using Domain.Dto;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Service.Interface;
@@ -9,10 +10,12 @@ namespace Service.Implementation;
 public class TrainerService : ITrainerService
 {
     private readonly IRepository<Trainer> _repository;
+    private readonly UserManager<GymAppUser> _userManager;
     
-    public TrainerService(IRepository<Trainer> repository)
+    public TrainerService(IRepository<Trainer> repository, UserManager<GymAppUser> userManager)
     {
         _repository = repository;
+        _userManager = userManager;
     }
     
     public async Task<List<Trainer>> GetAllAsync()
@@ -42,6 +45,10 @@ public class TrainerService : ITrainerService
 
     public async Task<Trainer> InsertAsync(TrainerDto trainerDto)
     {
+        var user = await _userManager.FindByIdAsync(trainerDto.UserId.ToString());
+        if (user == null)
+            throw new InvalidOperationException($"User with id {trainerDto.UserId} not found");
+        
         var result = new Trainer()
         {
             UserId = trainerDto.UserId,
@@ -54,6 +61,10 @@ public class TrainerService : ITrainerService
 
     public async Task<Trainer> UpdateAsync(Guid id, TrainerDto trainerDto)
     {
+        var user = await _userManager.FindByIdAsync(trainerDto.UserId.ToString());
+        if (user == null)
+            throw new InvalidOperationException($"User with id {trainerDto.UserId} not found");
+        
         var result = await GetByIdNotNullAsync(id);
         result.UserId = trainerDto.UserId;
         result.YearsExperience = trainerDto.YearsExperience;

@@ -9,10 +9,11 @@ namespace Service.Implementation;
 public class WorkoutPlanService : IWorkoutPlanService
 {
     private readonly IRepository<WorkoutPlan> _repository;
-    
-    public WorkoutPlanService(IRepository<WorkoutPlan> repository)
+    private readonly ITrainerService _trainerService;
+    public WorkoutPlanService(IRepository<WorkoutPlan> repository, ITrainerService trainerService)
     {
         _repository = repository;
+        _trainerService = trainerService;
     }
     
     public async Task<List<WorkoutPlan>> GetAllAsync()
@@ -42,6 +43,10 @@ public class WorkoutPlanService : IWorkoutPlanService
 
     public async Task<WorkoutPlan> InsertAsync(WorkoutPlanDto workoutPlanDto)
     {
+        var trainer = await _trainerService.GetByIdAsync(workoutPlanDto.TrainerId);
+        if (trainer == null)
+            throw new InvalidOperationException($"Trainer with id {workoutPlanDto.TrainerId} not found");
+        
         var result = new WorkoutPlan()
         {
             Name = workoutPlanDto.Name,
@@ -54,6 +59,10 @@ public class WorkoutPlanService : IWorkoutPlanService
 
     public async Task<WorkoutPlan> UpdateAsync(Guid id, WorkoutPlanDto workoutPlanDto)
     {
+        var trainer = await _trainerService.GetByIdAsync(workoutPlanDto.TrainerId);
+        if (trainer == null)
+            throw new InvalidOperationException($"Trainer with id {workoutPlanDto.TrainerId} not found");
+        
         var result = await GetByIdNotNullAsync(id);
         result.Name = workoutPlanDto.Name;
         result.Description = workoutPlanDto.Description;

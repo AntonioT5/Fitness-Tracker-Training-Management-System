@@ -1,5 +1,6 @@
 ﻿using Domain.Dto;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
 using Service.Interface;
@@ -9,10 +10,12 @@ namespace Service.Implementation;
 public class MemberService : IMemberService
 {
     private readonly IRepository<Member> _repository;
+    private readonly UserManager<GymAppUser> _userManager;
     
-    public MemberService(IRepository<Member> repository)
+    public MemberService(IRepository<Member> repository, UserManager<GymAppUser> userManager)
     {
         _repository = repository;
+        _userManager = userManager;
     }
     
     public async Task<List<Member>> GetAllAsync()
@@ -42,6 +45,10 @@ public class MemberService : IMemberService
 
     public async Task<Member> InsertAsync(MemberDto memberDto)
     {
+        var user = await _userManager.FindByIdAsync(memberDto.UserId.ToString());
+        if (user == null)
+            throw new InvalidOperationException($"User with id {memberDto.UserId} not found");
+        
         var member = new Member()
         {
             UserId = memberDto.UserId,
@@ -55,6 +62,10 @@ public class MemberService : IMemberService
 
     public async Task<Member> UpdateAsync(Guid id, MemberDto memberDto)
     {
+        var user = await _userManager.FindByIdAsync(memberDto.UserId.ToString());
+        if (user == null)
+            throw new InvalidOperationException($"User with id {memberDto.UserId} not found");
+        
         var result = await GetByIdNotNullAsync(id);
         result.UserId = memberDto.UserId;
         result.DateOfBirth = memberDto.DateOfBirth;

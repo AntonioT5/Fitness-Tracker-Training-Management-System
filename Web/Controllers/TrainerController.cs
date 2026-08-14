@@ -41,17 +41,33 @@ public class TrainerController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] TrainerRequest request)
     {
-        var result = await _mapper.InsertAsync(request);
-        return Ok(result);
+        try
+        {
+            var result = await _mapper.InsertAsync(request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(new {error = e.Message});
+        }
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] TrainerRequest request)
     {
-        var result = await _mapper.UpdateAsync(id, request);
-        if (result == null)
-            return NotFound();
-        return Ok(result);
+        try
+        {
+            var result = await _mapper.UpdateAsync(id, request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e) when (e.Message.Contains("Trainer"))
+        {
+            return NotFound(new {error = e.Message});
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(new {error = e.Message});
+        }
     }
 
     [HttpDelete("{id}")]

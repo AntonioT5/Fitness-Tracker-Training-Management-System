@@ -41,17 +41,33 @@ public class ExerciseWorkoutPlanController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] ExerciseWorkoutPlanRequest request)
     {
-        var result = await _mapper.InsertAsync(request);
-        return Ok(result);
+        try
+        {
+            var result = await _mapper.InsertAsync(request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(new { error  = e.Message });
+        }
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ExerciseWorkoutPlanRequest request)
     {
-        var result = await _mapper.UpdateAsync(id, request);
-        if (result == null)
+        try
+        {
+            var result = await _mapper.UpdateAsync(id, request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e) when (e.Message.Contains("ExerciseWorkoutPlan"))
+        {
             return NotFound();
-        return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]

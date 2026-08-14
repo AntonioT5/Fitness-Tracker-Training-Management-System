@@ -9,10 +9,14 @@ namespace Service.Implementation;
 public class ExerciseWorkoutPlanService : IExerciseWorkoutPlanService
 {
     private readonly IRepository<ExerciseWorkoutPlan> _repository;
-
-    public ExerciseWorkoutPlanService(IRepository<ExerciseWorkoutPlan> repository)
+    private readonly IExerciseService _exerciseService;
+    private readonly IWorkoutPlanService _workoutPlanService;
+    
+    public ExerciseWorkoutPlanService(IRepository<ExerciseWorkoutPlan> repository, IExerciseService exerciseService, IWorkoutPlanService workoutPlanService)
     {
         _repository = repository;
+        _exerciseService = exerciseService;
+        _workoutPlanService = workoutPlanService;
     }
 
     public async Task<List<ExerciseWorkoutPlan>> GetAllAsync()
@@ -45,6 +49,14 @@ public class ExerciseWorkoutPlanService : IExerciseWorkoutPlanService
 
     public async Task<ExerciseWorkoutPlan> InsertAsync(ExerciseWorkoutPlanDto exerciseWorkoutPlanDto)
     {
+        var exercise = await _exerciseService.GetByIdAsync(exerciseWorkoutPlanDto.ExerciseId);
+        if (exercise == null)
+            throw new InvalidOperationException($"Exercise with {exerciseWorkoutPlanDto.ExerciseId} not found");
+        
+        var workoutPlan = await _workoutPlanService.GetByIdAsync(exerciseWorkoutPlanDto.WorkoutPlanId);
+        if (workoutPlan == null)
+            throw new InvalidOperationException($"WorkoutPlan with id {exerciseWorkoutPlanDto.WorkoutPlanId} not found");
+        
         var exerciseWorkoutPlan = new ExerciseWorkoutPlan()
         {
             Sets = exerciseWorkoutPlanDto.Sets,
@@ -57,6 +69,14 @@ public class ExerciseWorkoutPlanService : IExerciseWorkoutPlanService
 
     public async Task<ExerciseWorkoutPlan> UpdateAsync(Guid id, ExerciseWorkoutPlanDto exerciseWorkoutPlanDto)
     {
+        var exercise = await _exerciseService.GetByIdAsync(exerciseWorkoutPlanDto.ExerciseId);
+        if (exercise == null)
+            throw new InvalidOperationException($"Exercise with {exerciseWorkoutPlanDto.ExerciseId} not found");
+        
+        var workoutPlan = await _workoutPlanService.GetByIdAsync(exerciseWorkoutPlanDto.WorkoutPlanId);
+        if (workoutPlan == null)
+            throw new InvalidOperationException($"WorkoutPlan with id {exerciseWorkoutPlanDto.WorkoutPlanId} not found");
+        
         var exerciseWorkoutPlan = await GetByIdNotNullAsync(id);
         exerciseWorkoutPlan.Sets = exerciseWorkoutPlanDto.Sets;
         exerciseWorkoutPlan.Reps = exerciseWorkoutPlanDto.Reps;

@@ -9,10 +9,14 @@ namespace Service.Implementation;
 public class MembershipService : IMembershipService
 {
     private readonly IRepository<Membership> _repository;
+    private readonly IGymService _gymService;
+    private readonly IMemberService _memberService;
     
-    public MembershipService(IRepository<Membership> repository)
+    public MembershipService(IRepository<Membership> repository, IGymService gymService, IMemberService memberService)
     {
         _repository = repository;
+        _gymService = gymService;
+        _memberService = memberService;
     }
     
     public async Task<List<Membership>> GetAllAsync()
@@ -44,6 +48,14 @@ public class MembershipService : IMembershipService
 
     public async Task<Membership> InsertAsync(MembershipDto membershipDto)
     {
+        var gym = await _gymService.GetByIdAsync(membershipDto.GymId);
+        if (gym == null)
+            throw new InvalidOperationException($"Gym with id {membershipDto.GymId} not found");
+        
+        var member = await _memberService.GetByIdAsync(membershipDto.MemberId);
+        if (member == null)
+            throw new InvalidOperationException($"Member with id {membershipDto.MemberId} not found");
+        
         var membership = new Membership()
         {
             StartDate = membershipDto.StartDate,
@@ -59,6 +71,14 @@ public class MembershipService : IMembershipService
 
     public async Task<Membership> UpdateAsync(Guid id, MembershipDto membershipDto)
     {
+        var gym = await _gymService.GetByIdAsync(membershipDto.GymId);
+        if (gym == null)
+            throw new InvalidOperationException($"Gym with id {membershipDto.GymId} not found");
+        
+        var member = await _memberService.GetByIdAsync(membershipDto.MemberId);
+        if (member == null)
+            throw new InvalidOperationException($"Member with id {membershipDto.MemberId} not found");
+        
         var result = await GetByIdNotNullAsync(id);
         result.StartDate = membershipDto.StartDate;
         result.EndDate = membershipDto.EndDate;
