@@ -14,4 +14,5 @@ public interface IMembershipService
     
     public Task<PaginatedResult<Membership>> GetAllPagedAsync(int pageNumber, int pageSize);
     
+    Task<Membership?> GetActiveByMemberIdAsync(Guid memberId);
 }

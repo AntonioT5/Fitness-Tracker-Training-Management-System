@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Web.Mapper;
 using Web.Request;
 using Web.Response;
@@ -40,17 +41,33 @@ public class WorkoutSessionController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] WorkoutSessionRequest request)
     {
-        var result = await _mapper.InsertAsync(request);
-        return Ok(result);
+        try
+        {
+            var result = await _mapper.InsertAsync(request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] WorkoutSessionRequest request)
     {
-        var result = await _mapper.UpdateAsync(id, request);
-        if (result == null)
-            return NotFound();
-        return Ok(result);
+        try
+        {
+            var result = await _mapper.UpdateAsync(id, request);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]

@@ -1,4 +1,5 @@
-﻿using Domain.Dto;
+﻿using System.Security.Authentication;
+using Domain.Dto;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Repository.Interface;
@@ -9,10 +10,12 @@ namespace Service.Implementation;
 public class WorkoutSessionService : IWorkoutSessionService
 {
     private readonly IRepository<WorkoutSession> _repository;
+    private readonly IMembershipService _membershipService;
     
-    public WorkoutSessionService(IRepository<WorkoutSession> repository)
+    public WorkoutSessionService(IRepository<WorkoutSession> repository, IMembershipService membershipService)
     {
         _repository = repository;
+        _membershipService = membershipService;
     }
     
     public async Task<List<WorkoutSession>> GetAllAsync()
@@ -46,6 +49,10 @@ public class WorkoutSessionService : IWorkoutSessionService
 
     public async Task<WorkoutSession> InsertAsync(WorkoutSessionDto workoutSessionDto)
     {
+        var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
+        if (activeMembership == null)
+            throw new InvalidOperationException($"Member {workoutSessionDto.MemberId} does not have an active membership");
+        
         var result = new WorkoutSession()
         {
             Date = workoutSessionDto.Date,
@@ -58,12 +65,18 @@ public class WorkoutSessionService : IWorkoutSessionService
             TrainerId = workoutSessionDto.TrainerId,
             ExerciseId = workoutSessionDto.ExerciseId,
         };
-        return await _repository.InsertAsync(result);
+        await _repository.InsertAsync(result);
+        return await GetByIdNotNullAsync(result.Id);
     }
 
     public async Task<WorkoutSession> UpdateAsync(Guid id, WorkoutSessionDto workoutSessionDto)
     {
         var result = await GetByIdNotNullAsync(id);
+        
+        var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
+        if (activeMembership == null)
+            throw new InvalidOperationException($"Member {workoutSessionDto.MemberId} does not have an active membership");
+        
         result.Date = workoutSessionDto.Date;
         result.SetsCompleted = workoutSessionDto.SetsCompleted;
         result.RepsCompleted = workoutSessionDto.RepsCompleted;

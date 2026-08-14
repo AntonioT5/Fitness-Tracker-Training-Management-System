@@ -87,4 +87,11 @@ public class MembershipService : IMembershipService
             orderBy: x=>x.OrderBy(e=>e.StartDate),
             asNoTracking: true);
     }
+
+    public async Task<Membership?> GetActiveByMemberIdAsync(Guid memberId)
+    {
+        return await _repository.Get(selector: x => x,
+            predicate: x => x.MemberId == memberId && x.IsActive && x.StartDate<=DateTime.UtcNow && x.EndDate>=DateTime.UtcNow
+            );
+    }
 }

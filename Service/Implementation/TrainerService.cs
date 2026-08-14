@@ -47,7 +47,9 @@ public class TrainerService : ITrainerService
             UserId = trainerDto.UserId,
             YearsExperience = trainerDto.YearsExperience
         };
-        return await _repository.InsertAsync(result);
+        var insertedTrainer = await _repository.InsertAsync(result);
+
+        return await GetByIdNotNullAsync(insertedTrainer.Id);
     }
 
     public async Task<Trainer> UpdateAsync(Guid id, TrainerDto trainerDto)

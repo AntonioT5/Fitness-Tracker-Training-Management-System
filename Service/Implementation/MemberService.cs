@@ -48,7 +48,9 @@ public class MemberService : IMemberService
             DateOfBirth = memberDto.DateOfBirth,
             Goal = memberDto.Goal
         };
-        return await _repository.InsertAsync(member);
+        var insertedMember = await _repository.InsertAsync(member);
+
+        return await GetByIdNotNullAsync(insertedMember.Id);
     }
 
     public async Task<Member> UpdateAsync(Guid id, MemberDto memberDto)

@@ -49,15 +49,8 @@ public class WorkoutSessionMapper
     public async Task<WorkoutSessionResponse?> UpdateAsync(Guid id, WorkoutSessionRequest request)
     {
         var dto = request.ToDto();
-        try
-        {
-            var result = await _service.UpdateAsync(id, dto);
-            return result.ToResponse();
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
+        var result = await _service.UpdateAsync(id, dto);
+        return result.ToResponse();
     }
     
     public async Task<WorkoutSessionResponse?> DeleteAsync(Guid id)

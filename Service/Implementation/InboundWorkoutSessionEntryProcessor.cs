@@ -15,6 +15,7 @@ public class InboundWorkoutSessionEntryProcessor
     private readonly IMemberService _memberService;
     private readonly ITrainerService _trainerService;
     private readonly IExerciseService _exerciseService;
+    private readonly IMembershipService _membershipService;
     private readonly ILogger<InboundWorkoutSessionEntryProcessor> _logger;
     
     public InboundWorkoutSessionEntryProcessor(
@@ -23,7 +24,7 @@ public class InboundWorkoutSessionEntryProcessor
         IMemberService memberService,
         ITrainerService trainerService,
         IExerciseService exerciseService,
-        ILogger<InboundWorkoutSessionEntryProcessor> logger)
+        ILogger<InboundWorkoutSessionEntryProcessor> logger, IMembershipService membershipService)
     {
         _entryRepository = entryRepository;
         _sessionRepository = sessionRepository;
@@ -31,6 +32,7 @@ public class InboundWorkoutSessionEntryProcessor
         _trainerService = trainerService;
         _exerciseService = exerciseService;
         _logger = logger;
+        _membershipService = membershipService;
     }
 
     public async Task ProcessPendingEntriesAsync()
@@ -77,6 +79,10 @@ public class InboundWorkoutSessionEntryProcessor
         var member = await _memberService.GetByEmailAsync(request.MemberEmail);
         if (member == null)
             throw new InvalidOperationException($"Member with email {request.MemberEmail} not found");
+        
+        var activeMembership = await _membershipService.GetActiveByMemberIdAsync(member.Id);
+        if (activeMembership == null)
+            throw new InvalidOperationException($"Member {member.Id} does not have an active membership");
         
         var trainer = await _trainerService.GetByNameAsync(request.TrainerName);
         if (trainer == null)
