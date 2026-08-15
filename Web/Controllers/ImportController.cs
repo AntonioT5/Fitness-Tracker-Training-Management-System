@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interface;
 
@@ -7,6 +8,7 @@ namespace Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ImportController : ControllerBase
 {
     private readonly IExcelImportService _excelImportService;

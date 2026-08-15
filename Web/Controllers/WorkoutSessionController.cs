@@ -1,4 +1,5 @@
 ﻿using System.Security.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Mapper;
 using Web.Request;
@@ -8,6 +9,7 @@ namespace Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class WorkoutSessionController : ControllerBase
 {
     private readonly WorkoutSessionMapper _mapper;

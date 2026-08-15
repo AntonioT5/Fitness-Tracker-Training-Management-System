@@ -1,9 +1,12 @@
-﻿using System.Threading.RateLimiting;
+﻿using System.Text;
+using System.Threading.RateLimiting;
 using Domain.Configurations;
 using Domain.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Repository;
 using Repository.Implementation;
@@ -79,22 +82,6 @@ builder.Services.AddScoped<AuditInterceptor>();
 builder.Services.AddScoped<InboundWorkoutSessionEntryProcessor>();
 builder.Services.AddScoped<IInboundWorkoutSessionEntryService, InboundWorkoutSessionEntryService>();
 
-// WgerApi
-builder.Services.Configure<WgerApiSettings>(builder.Configuration.GetSection("WgerApi"));
-
-builder.Services.AddHttpClient<IWgerApiClient, WgerApiClient>((sp, client) =>
-{
-
-    var settings = sp.GetRequiredService<IOptions<WgerApiSettings>>();
-
-    client.BaseAddress = new Uri(settings.Value.BaseAddress);
-    client.Timeout = TimeSpan.FromSeconds(settings.Value.TimeoutSeconds);
-    // client.DefaultRequestHeaders.Add("X-Api-Key", settings.ApiKey);
-});
-
-// Background Service
-builder.Services.AddHostedService<EtlBackgroundService>();
-
 //User
 builder.Services.AddIdentity<GymAppUser, IdentityRole>(options =>
     {
@@ -105,12 +92,47 @@ builder.Services.AddIdentity<GymAppUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+//JWT
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
+        };
+    });
+
+// WgerApi
+builder.Services.Configure<WgerApiSettings>(builder.Configuration.GetSection("WgerApi"));
+
+builder.Services.AddHttpClient<IWgerApiClient, WgerApiClient>((sp, client) =>
+{
+
+    var settings = sp.GetRequiredService<IOptions<WgerApiSettings>>();
+
+    client.BaseAddress = new Uri(settings.Value.BaseAddress);
+    client.Timeout = TimeSpan.FromSeconds(settings.Value.TimeoutSeconds);
+});
+
+// Background Service
+builder.Services.AddHostedService<EtlBackgroundService>();
+
 //RateLimiter
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
-
-    
     
     options.AddPolicy("external-api", context =>
     {

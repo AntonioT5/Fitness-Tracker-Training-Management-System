@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Web.Mapper;
 using Web.Request;
 using Web.Response;
@@ -7,6 +8,7 @@ namespace Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ExerciseController : ControllerBase
 {
     private readonly ExerciseMapper _mapper;
