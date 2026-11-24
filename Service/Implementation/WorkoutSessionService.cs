@@ -66,7 +66,7 @@ public class WorkoutSessionService : IWorkoutSessionService
         
         var exercise = await _exerciseService.GetByIdAsync(workoutSessionDto.ExerciseId);
         if (exercise == null)
-            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.TrainerId} not found");
+            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.ExerciseId} not found");
         
         var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
         if (activeMembership == null)
@@ -102,7 +102,7 @@ public class WorkoutSessionService : IWorkoutSessionService
         
         var exercise = await _exerciseService.GetByIdAsync(workoutSessionDto.ExerciseId);
         if (exercise == null)
-            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.TrainerId} not found");
+            throw new InvalidOperationException($"Exercise with id {workoutSessionDto.ExerciseId} not found");
         
         var activeMembership = await _membershipService.GetActiveByMemberIdAsync(workoutSessionDto.MemberId);
         if (activeMembership == null)
