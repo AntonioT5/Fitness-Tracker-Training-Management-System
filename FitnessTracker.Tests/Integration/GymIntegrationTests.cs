@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace FitnessTracker.Tests.Integration
 {

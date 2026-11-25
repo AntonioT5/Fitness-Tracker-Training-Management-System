@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Domain.Dto;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore.Query;
@@ -108,6 +109,181 @@ namespace FitnessTracker.Tests.Services
                 repo.Verify(r=>r.InsertAsync(It.IsAny<Membership>()), Times.Never);
             }
 
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_ReturnsMembershipFromRepository()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            var membership = new Membership{ Id = Guid.NewGuid() };
+
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync(membership);
+
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+
+            var result = await service.GetByIdAsync(membership.Id);
+
+            Assert.Same(membership, result);
+        }
+
+        [Fact]
+        public async Task GetByIdNotNullAsync_WhenMissing_ThrowsWithId()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync((Membership?)null);
+
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+            var id = Guid.NewGuid();
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetByIdNotNullAsync(id));
+
+            Assert.Contains(id.ToString(), ex.Message);
+        }
+
+        [Fact]
+        public async Task GetByIdNotNullAsync_WhenExists_ReturnsMembership()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            var membership = new Membership{ Id = Guid.NewGuid() };
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync(membership);
+
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+
+            var result = await service.GetByIdAsync(membership.Id);
+            Assert.Same(membership, result);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenExists_DeletesMembership()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            var membership = new Membership{ Id = Guid.NewGuid() };
+
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync(membership);
+            repo.Setup(r=> r.DeleteAsync(It.IsAny<Membership>())).Returns((Membership m) => Task.FromResult(m));
+
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+
+            var result = await service.DeleteAsync(membership.Id);
+
+            Assert.Same(membership, result);
+            repo.Verify(r => r.DeleteAsync(membership), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenMissing_ThrowsAndDoesNotDelete()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync((Membership?)null);
+
+            var id = Guid.NewGuid();
+            
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.DeleteAsync(id));
+
+            repo.Verify(r => r.DeleteAsync(It.IsAny<Membership>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(true, true, true, null)]
+        [InlineData(false, true, true, "Gym")]
+        [InlineData(true, false, true, "Member")]
+        [InlineData(true, true, false, "Membership with id")]
+        public async Task UpdateAsync_WithDifferentEntityExistence(bool gymExists, bool memberExists, bool membershipExists, string? expectedError)
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            var gymService = new Mock<IGymService>();
+            var memberService = new Mock<IMemberService>();
+
+            var membership = new Membership {Id=Guid.NewGuid()};
+
+            var dto = new MembershipDto
+            {
+                GymId = Guid.NewGuid(),
+                MemberId = Guid.NewGuid(),
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(30),
+                Price = 150,
+                IsActive = true
+            };
+
+            gymService.Setup(g => g.GetByIdAsync(dto.GymId)).ReturnsAsync(gymExists ? new Gym() : null);
+            memberService.Setup(m => m.GetByIdAsync(dto.MemberId)).ReturnsAsync(memberExists ? new Member { UserId = Guid.NewGuid().ToString() } : null);
+            repo.Setup(r => r.Get<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
+                .ReturnsAsync(membershipExists ? membership : null);
+
+            repo.Setup(r=> r.UpdateAsync(It.IsAny<Membership>())).Returns((Membership m) => Task.FromResult(m));
+
+            var service = new MembershipService(repo.Object, gymService.Object, memberService.Object);
+
+            if (expectedError == null)
+            {
+                var result = await service.UpdateAsync(membership.Id, dto);
+
+                Assert.Equal(dto.GymId, result.GymId);
+                Assert.Equal(dto.MemberId, result.MemberId);
+                repo.Verify(r => r.UpdateAsync(It.IsAny<Membership>()), Times.Once);
+            }
+            else
+            {
+                var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateAsync(membership.Id, dto));
+                Assert.Contains(expectedError, ex.Message);
+                repo.Verify(r => r.UpdateAsync(It.IsAny<Membership>()), Times.Never);
+            }
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsAllMembershipsAsList()
+        {
+            var repo = new Mock<IRepository<Membership>>();
+            var m1 = new Membership { Id = Guid.NewGuid() };
+            var m2 = new Membership { Id = Guid.NewGuid() };
+
+            repo.Setup(r => r.GetAllAsync<Membership>(
+                    It.IsAny<Expression<Func<Membership, Membership>>>(),
+                    It.IsAny<Expression<Func<Membership, bool>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
+                    It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>(),
+                    It.IsAny<int?>()))
+                .ReturnsAsync((IEnumerable<Membership>)new List<Membership> { m1, m2 });
+
+            var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
+
+            var result = await service.GetAllAsync();
+
+            Assert.Equal(2, result.Count);
+            Assert.Contains(m1, result);
+            Assert.Contains(m2, result);
         }
     }
 }

@@ -66,6 +66,23 @@ namespace FitnessTracker.Tests.Integration
             var body = await response.Content.ReadFromJsonAsync<JsonElement>();
             Assert.False(string.IsNullOrWhiteSpace(body.GetProperty("token").GetString()));
         }
+
+        [Theory]
+        [InlineData("Test1234!", HttpStatusCode.OK)]
+        [InlineData("Te1!", HttpStatusCode.BadRequest)]
+        [InlineData("Testtest!", HttpStatusCode.BadRequest)]
+        [InlineData("test1234!", HttpStatusCode.BadRequest)]
+        [InlineData("TEST1234!", HttpStatusCode.BadRequest)]
+        [InlineData("Test12345", HttpStatusCode.BadRequest)]
+        public async Task Register_PasswordRules(string password, HttpStatusCode code)
+        {
+            var client = _factory.CreateApiClient();
+            var email = $"{Guid.NewGuid()}@test.com";
+
+            var response = await client.PostAsJsonAsync("/api/auth/register", new {FirstName = "Test", LastName = "User", Email = email, Password = password});
+
+            Assert.Equal(code, response.StatusCode);
+        }
         
     }
 }

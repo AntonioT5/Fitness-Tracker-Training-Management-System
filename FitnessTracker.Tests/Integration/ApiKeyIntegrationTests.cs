@@ -108,5 +108,45 @@ namespace FitnessTracker.Tests.Integration
             var body = await response.Content.ReadFromJsonAsync<JsonElement>();
             Assert.Equal("pending", body.GetProperty("status").GetString());
         }
+
+        [Fact]
+        public async Task ReceiveWorkoutSession_WithInValidApiKey_Returns401()
+        {
+            var apiKey = $"test-{Guid.NewGuid()}";
+
+            var apiClient = new ApiClient
+            {
+                Name = "Integration Test Client",
+                ApiKey = apiKey,
+                IsActive = false,
+                RateLimitMinutes = 10
+            };
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                dbContext.ApiClients.Add(apiClient);
+                await dbContext.SaveChangesAsync();
+            }
+
+            var client = _factory.CreateApiClient();
+            client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+
+            var request = new InboundWorkoutSessionRequest(
+                "member@test.com",
+                "Test Trainer",
+                "Bench Press",
+                DateTime.UtcNow,
+                3,
+                10,
+                50,
+                30,
+                "Integration test"
+            );
+
+            var response = await client.PostAsJsonAsync("/api/external/workoutSessions",request);
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
     }
 }
