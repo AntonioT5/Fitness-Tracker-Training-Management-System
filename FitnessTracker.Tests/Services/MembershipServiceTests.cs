@@ -110,25 +110,30 @@ namespace FitnessTracker.Tests.Services
             }
 
         }
-
+        
         [Fact]
-        public async Task GetByIdAsync_ReturnsMembershipFromRepository()
+        public async Task GetByIdAsync_ReturnsOnlyTheMembershipWithThatId()
         {
-            var repo = new Mock<IRepository<Membership>>();
-            var membership = new Membership{ Id = Guid.NewGuid() };
+            var wanted = new Membership { Id = Guid.NewGuid() };
+            var other = new Membership { Id = Guid.NewGuid() };
+            var memberships = new List<Membership> { other, wanted };
 
+            var repo = new Mock<IRepository<Membership>>();
             repo.Setup(r => r.Get<Membership>(
                     It.IsAny<Expression<Func<Membership, Membership>>>(),
                     It.IsAny<Expression<Func<Membership, bool>>?>(),
                     It.IsAny<Func<IQueryable<Membership>, IOrderedQueryable<Membership>>?>(),
                     It.IsAny<Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>?>()))
-                .ReturnsAsync(membership);
+                .Returns((Expression<Func<Membership, Membership>> selector,
+                        Expression<Func<Membership, bool>>? predicate,
+                        Func<IQueryable<Membership>, IOrderedQueryable<Membership>>? orderBy,
+                        Func<IQueryable<Membership>, IIncludableQueryable<Membership, object>>? include)
+                    => Task.FromResult(memberships.AsQueryable().Where(predicate!).Select(selector).FirstOrDefault()));
 
             var service = new MembershipService(repo.Object, Mock.Of<IGymService>(), Mock.Of<IMemberService>());
 
-            var result = await service.GetByIdAsync(membership.Id);
-
-            Assert.Same(membership, result);
+            Assert.Same(wanted, await service.GetByIdAsync(wanted.Id));
+            Assert.Null(await service.GetByIdAsync(Guid.NewGuid()));
         }
 
         [Fact]
